@@ -10,6 +10,7 @@ namespace ScriptCs.Command
         private readonly IScriptPackResolver _scriptPackResolver;
 
         private readonly IAssemblyResolver _assemblyResolver;
+        private readonly string _scriptName;
 
         private readonly IFilePreProcessor _filePreProcessor;
 
@@ -28,7 +29,7 @@ namespace ScriptCs.Command
             IFilePreProcessor filePreProcessor,
             ILog logger,
             IConsole console,
-            IAssemblyResolver assemblyResolver)
+            IAssemblyResolver assemblyResolver, string scriptName)
         {
             _fileSystem = fileSystem;
             _scriptPackResolver = scriptPackResolver;
@@ -37,6 +38,7 @@ namespace ScriptCs.Command
             _logger = logger;
             _console = console;
             _assemblyResolver = assemblyResolver;
+            _scriptName = scriptName;
         }
 
         public string[] ScriptArgs { get; private set; }
@@ -54,6 +56,12 @@ namespace ScriptCs.Command
 
             try
             {
+                if (!string.IsNullOrWhiteSpace(_scriptName))
+                {
+                    _logger.Info(string.Format("Loading preseeded script: {0}", _scriptName));
+                    repl.Execute("#load " + _scriptName);    
+                }
+                
                 while (ExecuteLine(repl)) { }
             }
             catch (Exception ex)

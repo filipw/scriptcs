@@ -8,7 +8,8 @@ namespace ScriptCs
     [ArgExample("scriptcs server.csx -debug", "Shows how to start the script with debug mode switched on")]
     public class ScriptCsArgs
     {
-        [ArgIgnore]
+        [ArgDescription("Switch to load REPL. REPL also loads when scriptcs is started without any args.")]
+        [ArgShortcut("repl")]
         public bool Repl { get; set; }
 
         [ArgPosition(0)]
@@ -16,7 +17,6 @@ namespace ScriptCs
         public string ScriptName { get; set; }
 
         [ArgDescription("Displays help")]
-        
         [ArgShortcut("?")]
         public bool Help { get; set; }
 
@@ -37,7 +37,6 @@ namespace ScriptCs
         [ArgShortcut("g")]
         [ArgDescription("Installs and restores global packages which are specified in packages.config")]
         public bool Global { get; set; }
-
 
         [ArgShortcut("save")]
         [ArgDescription("Creates a packages.config file based on the packages directory")]
