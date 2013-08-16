@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Common.Logging;
 
@@ -72,6 +73,12 @@ namespace ScriptCs.Command
                     return CommandResult.Success;
                 }
 
+                return CommandResult.Error;
+            }
+            catch (FileNotFoundException ex)
+            {
+                _logger.Error(ex.Message);
+                _logger.Error(string.Format("Cannot locate the following assembly: {0}", ex.FileName));
                 return CommandResult.Error;
             }
             catch (Exception ex)
