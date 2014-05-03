@@ -31,6 +31,7 @@ namespace ScriptCs.Engine.Mono
             ScriptPackSession scriptPackSession)
         {
             references.PathReferences.UnionWith(scriptPackSession.References);
+			var parser = new SyntaxParser();
 
             SessionState<Evaluator> sessionState;
             if (!scriptPackSession.State.ContainsKey(SessionKey))
@@ -51,7 +52,6 @@ namespace ScriptCs.Engine.Mono
 
                 evaluator.Compile(builder.ToString());
 
-                var parser = new SyntaxParser();
                 var parseResult = parser.Parse(code);
 
                 var host = _scriptHostFactory.CreateScriptHost(new ScriptPackManager(scriptPackSession.Contexts), scriptArgs);
@@ -60,13 +60,13 @@ namespace ScriptCs.Engine.Mono
                 evaluator.ReferenceAssembly(typeof(MonoHost).Assembly);
                 evaluator.InteractiveBaseClass = typeof(MonoHost);
 
-                if (parseResult.Declarations != null)
+				if (!string.IsNullOrWhiteSpace(parseResult.Declarations))
                 {
                     evaluator.Compile(parseResult.Declarations);
                     code = null;
                 }
 
-                if (parseResult.Evaluations != null)
+				if (!string.IsNullOrWhiteSpace(parseResult.Evaluations))
                 {
                     code = parseResult.Evaluations;
                 }
@@ -96,16 +96,18 @@ namespace ScriptCs.Engine.Mono
                     PathReferences = new HashSet<string>(references.PathReferences)
                 };
 
-                var parser = new SyntaxParser();
                 var parseResult = parser.Parse(code);
 
-                if (parseResult.Declarations != null)
+				if (!string.IsNullOrWhiteSpace(parseResult.Declarations))
                 {
                     var compiledMethod = sessionState.Session.Compile(parseResult.Declarations);
                     return new ScriptResult();
                     //code = parseResult.Declarations;
                 }
             }
+
+			// to support methods
+			code = parser.ParseEval(code);
 
             Logger.Debug("Starting execution");
 
