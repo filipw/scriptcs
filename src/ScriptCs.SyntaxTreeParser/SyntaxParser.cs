@@ -38,9 +38,11 @@ namespace ScriptCs.SyntaxTreeParser
 			sb.Append("class ");
 			sb.Append("Temp_");
 			sb.Append(Guid.NewGuid().ToString().Replace('-','_'));
-			sb.Append("{\n");
+			sb.Append("{");
+			sb.Append(Environment.NewLine);
 			sb.Append(eval);
-			sb.Append("\n}");
+			sb.Append(Environment.NewLine);
+			sb.Append("}");
 
 			// collect methods as field def.
 			var visit = new MethodVisitor();
