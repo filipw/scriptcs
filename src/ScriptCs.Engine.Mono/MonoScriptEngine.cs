@@ -60,15 +60,16 @@ namespace ScriptCs.Engine.Mono
                 evaluator.ReferenceAssembly(typeof(MonoHost).Assembly);
                 evaluator.InteractiveBaseClass = typeof(MonoHost);
 
-				if (!string.IsNullOrWhiteSpace(parseResult.Declarations))
+				if (!string.IsNullOrWhiteSpace(parseResult.TypeDeclarations))
                 {
-                    evaluator.Compile(parseResult.Declarations);
+                    evaluator.Compile(parseResult.TypeDeclarations);
                     code = null;
                 }
 
-				if (!string.IsNullOrWhiteSpace(parseResult.Evaluations))
+				if (!string.IsNullOrWhiteSpace(parseResult.Evaluations)
+                    || !string.IsNullOrWhiteSpace(parseResult.MethodDeclarations))
                 {
-                    code = parseResult.Evaluations;
+                    code = parseResult.MethodDeclarations + parseResult.Evaluations;
                 }
 
                 sessionState = new SessionState<Evaluator>
@@ -98,16 +99,13 @@ namespace ScriptCs.Engine.Mono
 
                 var parseResult = parser.Parse(code);
 
-				if (!string.IsNullOrWhiteSpace(parseResult.Declarations))
+				if (!string.IsNullOrWhiteSpace(parseResult.TypeDeclarations))
                 {
-                    var compiledMethod = sessionState.Session.Compile(parseResult.Declarations);
+                    var compiledMethod = sessionState.Session.Compile(parseResult.TypeDeclarations);
                     return new ScriptResult();
                     //code = parseResult.Declarations;
                 }
             }
-
-			// to support methods
-			code = parser.ParseEval(code);
 
             Logger.Debug("Starting execution");
 

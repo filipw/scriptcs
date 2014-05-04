@@ -1,17 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using ICSharpCode.NRefactory.CSharp;
-
-namespace ScriptCs.SyntaxTreeParser
+namespace ScriptCs.SyntaxTreeParser.Visitors
 {
-	public class MethodVisitor : DepthFirstAstVisitor
-	{
-		public List<Tuple<MethodDeclaration, FieldDeclaration>> Methods 
-			= new List<Tuple<MethodDeclaration, FieldDeclaration>>();
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-		public override void VisitMethodDeclaration (MethodDeclaration methodDeclaration)
-		{
+    using ICSharpCode.NRefactory.CSharp;
+
+    public class MethodVisitor : DepthFirstAstVisitor
+	{
+        private readonly List<Tuple<MethodDeclaration, FieldDeclaration>> methods;
+
+        internal MethodVisitor()
+        {
+            this.methods = new List<Tuple<MethodDeclaration, FieldDeclaration>>();
+        }
+
+        internal List<Tuple<MethodDeclaration, FieldDeclaration>> GetMethodDeclarations()
+        {
+            return this.methods;
+        }
+
+	    public override void VisitMethodDeclaration (MethodDeclaration methodDeclaration)
+	    {
 			//get method parameters
 			IEnumerable<ParameterDeclaration> parameters = methodDeclaration
 				.GetChildrenByRole(Roles.Parameter)
@@ -24,37 +34,31 @@ namespace ScriptCs.SyntaxTreeParser
 			methodType
 				.TypeArguments
 				.AddRange(parameters
-				.Select(x => GetKeywordAsPrimitiveType(x)));
+				.Select(x => this.GetKeywordAsPrimitiveType(x)));
 
 			//add result type
 			methodType
 				.TypeArguments
-				.Add(GetKeywordAsPrimitiveType(methodDeclaration));
+				.Add(this.GetKeywordAsPrimitiveType(methodDeclaration));
 
 			//get method body
-			BlockStatement methodBody = (BlockStatement)methodDeclaration
+			var methodBody = (BlockStatement)methodDeclaration
 				.GetChildrenByRole(Roles.Body)
 				.FirstOrDefault()
 				.Clone();
 
 			//get methodName
-			var methodName = GetIdentifierName(methodDeclaration);
+			var methodName = this.GetIdentifierName(methodDeclaration);
 
 			//create named method expression
 			var methodExpression = new VariableInitializer(methodName, 
 				new AnonymousMethodExpression(methodBody, parameters));
 
 			//compose type and expression
-			var namedMethodExpr = new FieldDeclaration();
-			namedMethodExpr.ReturnType = methodType;
-			namedMethodExpr.Variables.Add(methodExpression);
+			var namedMethodExpr = new FieldDeclaration { ReturnType = methodType };
+	        namedMethodExpr.Variables.Add(methodExpression);
 
-			this.Methods.Add(new Tuple<MethodDeclaration, FieldDeclaration>
-				(methodDeclaration, namedMethodExpr));
-
-
-			//replace method declaration with named method expresssion
-			methodDeclaration.ReplaceWith(namedMethodExpr);
+	        this.methods.Add(new Tuple<MethodDeclaration, FieldDeclaration>(methodDeclaration, namedMethodExpr));
 		}
 
 		public string GetIdentifierName(AstNode node)
