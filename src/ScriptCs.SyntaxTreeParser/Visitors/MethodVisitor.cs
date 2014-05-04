@@ -27,8 +27,11 @@ namespace ScriptCs.SyntaxTreeParser.Visitors
 				.GetChildrenByRole(Roles.Parameter)
 				.Select(x => (ParameterDeclaration)x.Clone());
 
+	        var returnType = this.GetKeywordAsPrimitiveType(methodDeclaration);
+	        var isVoid = string.Compare(returnType.Keyword, "void", StringComparison.OrdinalIgnoreCase) == 0;
+
 			//create new method type 
-			var methodType = new SimpleType(Identifier.Create("Func"));
+			var methodType = new SimpleType(Identifier.Create( isVoid ? "Action" : "Func"));
 
 			//add parameter types
 			methodType
@@ -37,11 +40,11 @@ namespace ScriptCs.SyntaxTreeParser.Visitors
 				.Select(x => this.GetKeywordAsPrimitiveType(x)));
 
 			//add result type
-			methodType
-				.TypeArguments
-				.Add(this.GetKeywordAsPrimitiveType(methodDeclaration));
-
-			//get method body
+	        if (!isVoid)
+	        {
+	            methodType.TypeArguments.Add(returnType);
+	        }
+	        //get method body
 			var methodBody = (BlockStatement)methodDeclaration
 				.GetChildrenByRole(Roles.Body)
 				.FirstOrDefault()
