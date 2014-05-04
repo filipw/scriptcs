@@ -27,17 +27,26 @@ namespace ScriptCs.SyntaxTreeParser.Visitors
 				.GetChildrenByRole(Roles.Parameter)
 				.Select(x => (ParameterDeclaration)x.Clone());
 
-	        var returnType = this.GetKeywordAsPrimitiveType(methodDeclaration);
-	        var isVoid = string.Compare(returnType.Keyword, "void", StringComparison.OrdinalIgnoreCase) == 0;
+	        var isVoid = false;
+            AstType returnType = methodDeclaration.GetChildByRole(Roles.Type).Clone();
+	        var type = returnType as PrimitiveType;
+	        if (type != null)
+	        {
+                isVoid = string.Compare(
+                    type.Keyword, "void", StringComparison.OrdinalIgnoreCase) == 0;
+	        }
 
 			//create new method type 
 			var methodType = new SimpleType(Identifier.Create( isVoid ? "Action" : "Func"));
 
+
+	        IEnumerable<AstType> types = parameters.Select(
+	            x => x.GetChildByRole(Roles.Type).Clone());
+            
 			//add parameter types
 			methodType
 				.TypeArguments
-				.AddRange(parameters
-				.Select(x => this.GetKeywordAsPrimitiveType(x)));
+				.AddRange(types);
 
 			//add result type
 	        if (!isVoid)
@@ -78,22 +87,6 @@ namespace ScriptCs.SyntaxTreeParser.Visitors
 				}
 			}
 			return string.Empty;
-		}
-
-		public PrimitiveType GetKeywordAsPrimitiveType(AstNode node)
-		{
-			foreach(var child in node.GetChildrenByRole(Roles.Type))
-			{
-				foreach(var p in child
-					.GetType()
-					.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
-					.Where(x => x.Name == "Keyword"))
-				{
-					var obj = p.GetValue(child, null);
-					return new PrimitiveType(obj.ToString());
-				}
-			}
-			throw new MemberAccessException("Primitive type not found for AstNode");
 		}
 	}
 }

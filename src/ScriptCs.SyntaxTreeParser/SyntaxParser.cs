@@ -51,7 +51,7 @@
                     code.TypeDeclarations += src;
                     var offset = script.GetCurrentOffset(klass.GetRegion().Begin);
                     script.Replace(klass, new TypeDeclaration());
-                    script.Replace(offset, new TypeDeclaration().GetText().Length, "");
+                    script.Replace(offset, new TypeDeclaration().GetText().Trim().Length, "");
                 }
                 code.Evaluations = document.Text;
             }
@@ -80,7 +80,7 @@
 
                     var offset = script.GetCurrentOffset(oldMethod.GetRegion().Begin);
                     script.Replace(oldMethod, new MethodDeclaration());
-                    script.Replace(offset, new MethodDeclaration().GetText().Length, "");
+                    script.Replace(offset, new MethodDeclaration().GetText().Trim().Length, "");
 				}
 			}
             code.Evaluations = document.Text;
