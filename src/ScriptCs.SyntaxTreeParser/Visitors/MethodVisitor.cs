@@ -1,3 +1,5 @@
+using Mono.CSharp;
+
 namespace ScriptCs.SyntaxTreeParser.Visitors
 {
     using System;
@@ -28,6 +30,7 @@ namespace ScriptCs.SyntaxTreeParser.Visitors
 				.Select(x => (ParameterDeclaration)x.Clone());
 
 	        var isVoid = false;
+	        var isAsync = methodDeclaration.Modifiers.HasFlag(Modifiers.Async);
             AstType returnType = methodDeclaration.GetChildByRole(Roles.Type).Clone();
 	        var type = returnType as PrimitiveType;
 	        if (type != null)
@@ -53,6 +56,7 @@ namespace ScriptCs.SyntaxTreeParser.Visitors
 	        {
 	            methodType.TypeArguments.Add(returnType);
 	        }
+
 	        //get method body
 			var methodBody = (BlockStatement)methodDeclaration
 				.GetChildrenByRole(Roles.Body)
@@ -62,9 +66,11 @@ namespace ScriptCs.SyntaxTreeParser.Visitors
 			//get methodName
 			var methodName = this.GetIdentifierName(methodDeclaration);
 
-			//create named method expression
-			var methodExpression = new VariableInitializer(methodName, 
-				new AnonymousMethodExpression(methodBody, parameters));
+            //create anonymous method
+	        var anonymousMethod = new AnonymousMethodExpression(methodBody, parameters) {IsAsync = isAsync};
+
+            //create named method expression
+            var methodExpression = new VariableInitializer(methodName, anonymousMethod);
 
 			//compose type and expression
 			var namedMethodExpr = new FieldDeclaration { ReturnType = methodType };
