@@ -25,5 +25,18 @@ namespace ScriptCs.Engine.Mono
         {
             return _scriptHost.Require<T>();
         }
+
+
+        object IScriptHost.LastValue
+        {
+            get;
+            set;
+        }
+
+        public static object LastValue
+        {
+            get;
+            set;
+        }
     }
 }

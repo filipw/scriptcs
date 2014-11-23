@@ -14,6 +14,7 @@ namespace ScriptCs.Engine.Mono
     public class MonoScriptEngine : IScriptEngine
     {
         private readonly IScriptHostFactory _scriptHostFactory;
+        private IScriptHost host;
         public string BaseDirectory { get; set; }
         public string CacheDirectory { get; set; }
         public string FileName { get; set; }
@@ -22,6 +23,7 @@ namespace ScriptCs.Engine.Mono
 
         public MonoScriptEngine(IScriptHostFactory scriptHostFactory, ILog logger)
         {
+            host = null;
             _scriptHostFactory = scriptHostFactory;
             Logger = logger;
         }
@@ -51,7 +53,7 @@ namespace ScriptCs.Engine.Mono
                 var evaluator = new Evaluator(context);
                 var allNamespaces = namespaces.Union(scriptPackSession.Namespaces).Distinct();
 
-                var host = _scriptHostFactory.CreateScriptHost(new ScriptPackManager(scriptPackSession.Contexts), scriptArgs);
+                host = _scriptHostFactory.CreateScriptHost(new ScriptPackManager(scriptPackSession.Contexts), scriptArgs);
                 MonoHost.SetHost((ScriptHost)host);
 
                 evaluator.ReferenceAssembly(typeof(MonoHost).Assembly);
@@ -88,6 +90,20 @@ namespace ScriptCs.Engine.Mono
 
             Logger.Debug("Starting execution");
             var result = Execute(code, sessionState.Session);
+
+            if (result.ReturnValue != null)
+            {
+                MonoHost.LastValue = result.ReturnValue;
+                if (result.ReturnValue != null)
+                {
+                    var temp = Execute(result.ReturnValue.GetType() + " _ = (" + result.ReturnValue.GetType() + ")LastValue;", sessionState.Session);
+                }
+                else
+                {
+                    Execute("object _ = null);", sessionState.Session);
+                }
+            }
+
             Logger.Debug("Finished execution");
             return result;
         }

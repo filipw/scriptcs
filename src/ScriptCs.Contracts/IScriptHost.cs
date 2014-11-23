@@ -5,5 +5,7 @@ namespace ScriptCs.Contracts
     public interface IScriptHost 
     {
         T Require<T>() where T : IScriptPackContext;
+
+        object LastValue { get; set; }
     }
 }

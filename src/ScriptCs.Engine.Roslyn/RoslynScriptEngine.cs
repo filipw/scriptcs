@@ -16,12 +16,14 @@ namespace ScriptCs.Engine.Roslyn
     {
         protected readonly ScriptEngine ScriptEngine;
         private readonly IScriptHostFactory _scriptHostFactory;
+        private IScriptHost host;
 
         public const string SessionKey = "Session";
         private const string InvalidNamespaceError = "error CS0246";
 
         public RoslynScriptEngine(IScriptHostFactory scriptHostFactory, ILog logger)
         {
+            host = null;
             ScriptEngine = new ScriptEngine();
             ScriptEngine.AddReference(typeof(ScriptExecutor).Assembly);
             _scriptHostFactory = scriptHostFactory;
@@ -58,7 +60,7 @@ namespace ScriptCs.Engine.Roslyn
             if (isFirstExecution)
             {
                 code = code.DefineTrace();
-                var host = _scriptHostFactory.CreateScriptHost(new ScriptPackManager(scriptPackSession.Contexts), scriptArgs);
+                host = _scriptHostFactory.CreateScriptHost(new ScriptPackManager(scriptPackSession.Contexts), scriptArgs);
                 Logger.Debug("Creating session");
 
                 var hostType = host.GetType();
@@ -152,6 +154,19 @@ namespace ScriptCs.Engine.Roslyn
                         }
                         pendingNamespacesField.SetValue(sessionState.Session, ReadOnlyArray<string>.CreateFrom<string>(fixedNamespaces));
                     }
+                }
+            }
+
+            if (result.IsCompleteSubmission && result.ReturnValue != null)
+            {
+                host.LastValue = result.ReturnValue;
+                if (result.ReturnValue != null)
+                {
+                    var temp = Execute(result.ReturnValue.GetType() + " _ = (" + result.ReturnValue.GetType() + ")LastValue;", sessionState.Session);
+                }
+                else
+                {
+                    Execute("object _ = null);", sessionState.Session);
                 }
             }
 

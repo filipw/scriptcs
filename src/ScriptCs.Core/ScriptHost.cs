@@ -18,5 +18,7 @@ namespace ScriptCs
         {
             return _scriptPackManager.Get<T>();
         }
+
+        public dynamic LastValue { get; set; }
     }
 }
