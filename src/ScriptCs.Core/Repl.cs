@@ -117,29 +117,6 @@ namespace ScriptCs
 
                 result = ScriptEngine.Execute(Buffer, _scriptArgs, References, Namespaces, ScriptPackSession);
 
-                //if (Buffer != "" && matches.Captures.Count == 0)
-                //{
-                //    //Save the result temporarily to a hidden var. Need to compile this first to make sure the type gets interpolated properly.
-                //    //var tempBuffer = "var __temp__ = " + Buffer + Environment.NewLine;
-                //    //if (!tempBuffer.EndsWith(";")) tempBuffer += ";";
-                //    result = ScriptEngine.Execute(tempBuffer, _scriptArgs, References, Namespaces, ScriptPackSession);
-
-                //    //If this is multi-line OR if there is an exception then compile again without trying to save the result as there is either an error, or it is a void method.
-                //    if (result.CompileExceptionInfo != null || !result.IsCompleteSubmission)
-                //    {
-                //        result = ScriptEngine.Execute(Buffer, _scriptArgs, References, Namespaces, ScriptPackSession);
-                //    }
-                //    else
-                //    {
-                //        //if it compiled sucessfully then the last value was saved in __temp__, now set it to "_".
-                //        result = ScriptEngine.Execute("var _ = __temp__;" + Environment.NewLine + "__temp__", scriptArgs, References, Namespaces, ScriptPackSession);
-                //    }
-                //}
-                //else
-                //{
-                //    result = ScriptEngine.Execute(Buffer, _scriptArgs, References, Namespaces, ScriptPackSession);
-                //}
-
                 if (result == null) return ScriptResult.Empty;
 
                 if (result.CompileExceptionInfo != null)
