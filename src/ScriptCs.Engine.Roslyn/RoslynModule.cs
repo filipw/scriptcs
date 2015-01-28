@@ -9,13 +9,13 @@ namespace ScriptCs.Engine.Roslyn
         {
             Guard.AgainstNullArgument("config", config);
 
-            if (!config.Overrides.ContainsKey(typeof(IScriptEngine)))
-            {
-                var engineType = config.Cache ? typeof(RoslynScriptPersistentEngine) : typeof(RoslynScriptEngine);
-                engineType = config.Debug ? typeof(RoslynScriptInMemoryEngine) : engineType;
-                engineType = config.IsRepl ? typeof(RoslynReplEngine) : engineType;
-                config.Overrides[typeof(IScriptEngine)] = engineType;
-            }
+            //if (!config.Overrides.ContainsKey(typeof(IScriptEngine)))
+            //{
+                //var engineType = config.Cache ? typeof(RoslynScriptPersistentEngine) : typeof(RoslynScriptEngine);
+                //engineType = config.Debug ? typeof(RoslynScriptInMemoryEngine) : engineType;
+                //engineType = config.IsRepl ? typeof(RoslynReplEngine) : engineType;
+                config.Overrides[typeof(IScriptEngine)] = typeof(RoslynScriptEngine);
+            //}
         }
     }
 }
