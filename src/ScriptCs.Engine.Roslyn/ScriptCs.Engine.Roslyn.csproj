@@ -40,6 +40,12 @@
     <Reference Include="Microsoft.CodeAnalysis">
       <HintPath>..\..\lib\Microsoft.CodeAnalysis.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp">
+      <HintPath>..\..\lib\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Desktop">
+      <HintPath>..\..\lib\Microsoft.CodeAnalysis.Desktop.dll</HintPath>
+    </Reference>
     <Reference Include="Roslyn.Scripting.Common">
       <HintPath>..\..\lib\Roslyn.Scripting.Common.dll</HintPath>
     </Reference>
