@@ -50,23 +50,21 @@ namespace ScriptCs.Engine.Roslyn
             var executionReferences = new AssemblyReferences(references.PathReferences, references.Assemblies);
             executionReferences.PathReferences.UnionWith(scriptPackSession.References);
 
-            ScriptState result;
+            ScriptResult scriptResult;
             SessionState<ScriptState> sessionState;
 
             var isFirstExecution = !scriptPackSession.State.ContainsKey(SessionKey);
 
-                            var host = _scriptHostFactory.CreateScriptHost(new ScriptPackManager(scriptPackSession.Contexts), scriptArgs);
-                Logger.Debug("Creating session");
+            var host = _scriptHostFactory.CreateScriptHost(new ScriptPackManager(scriptPackSession.Contexts), scriptArgs);
+            Logger.Debug("Creating session");
 
-                var hostType = host.GetType();
+            var hostType = host.GetType();
 
             if (isFirstExecution)
             {
                 code = code.DefineTrace();
-                                _scriptOptions = _scriptOptions.AddReferences(hostType.Assembly);
+                _scriptOptions = _scriptOptions.AddReferences(hostType.Assembly);
                 
-                //var session = new ScriptState
-                //var session = CSharpScript.Run.CreateSession(host, hostType);
                 var allNamespaces = namespaces.Union(scriptPackSession.Namespaces).Distinct();
 
                 foreach (var reference in executionReferences.PathReferences)
@@ -90,8 +88,8 @@ namespace ScriptCs.Engine.Roslyn
                 sessionState = new SessionState<ScriptState> { References = executionReferences, Namespaces = new HashSet<string>(allNamespaces) };
                 scriptPackSession.State[SessionKey] = sessionState;
 
-                result = CSharpScript.Run(code, _scriptOptions, host);
-                sessionState.Session = result;
+                //result = CSharpScript.Run(code, _scriptOptions, host);
+                scriptResult = Execute(code, host, sessionState);
             }
             else
             {
@@ -137,17 +135,12 @@ namespace ScriptCs.Engine.Roslyn
                     System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
                 makemethod.Invoke(sessionState.Session.Script,
                     new object[] {code, null, _scriptOptions, host.GetType(), typeof (object), null, sessionState.Session.Script});
-                result = CSharpScript.Run(code, _scriptOptions, sessionState.Session);
-                sessionState.Session = result;
+                //result = CSharpScript.Run(code, _scriptOptions, sessionState.Session);
+                //sessionState.Session = result;
+                scriptResult = Execute(code, sessionState.Session, sessionState);
             }
 
-            Logger.Debug("Starting execution");
-
-            //var result = Execute(code, sessionState.Session);
-
-
-
-            return new ScriptResult(returnValue: result.ReturnValue);
+            return scriptResult;
 
             //if (result.InvalidNamespaces.Any())
             //{
@@ -172,8 +165,32 @@ namespace ScriptCs.Engine.Roslyn
             //    }
             //}
 
-            //Logger.Debug("Finished execution");
+            //
             //return result;
+        }
+
+        private ScriptResult Execute(string code, object globals, SessionState<ScriptState> sessionState)
+        {
+            try
+            {
+                Logger.Debug("Starting execution");
+                var result = CSharpScript.Run(code, _scriptOptions, globals);
+                Logger.Debug("Finished execution");
+                sessionState.Session = result;
+                return new ScriptResult(returnValue: result.ReturnValue);
+            }
+            catch (AggregateException ex)
+            {
+                return new ScriptResult(executionException: ex.InnerException);
+            }
+            catch (CompilationErrorException ex)
+            {
+                return new ScriptResult(compilationException: ex);
+            }
+            catch (Exception ex)
+            {
+                return new ScriptResult(executionException: ex);
+            }
         }
 
         //protected virtual ScriptResult Execute(string code, Session session)
