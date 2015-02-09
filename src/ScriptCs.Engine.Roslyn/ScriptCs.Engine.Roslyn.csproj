@@ -80,6 +80,7 @@
     </Compile>
     <Compile Include="RoslynModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoslynReplEngine.cs" />
     <Compile Include="RoslynScriptEngine.cs" />
   </ItemGroup>
   <ItemGroup>

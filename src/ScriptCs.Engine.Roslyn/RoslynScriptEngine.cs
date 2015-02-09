@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Common.Logging;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Roslyn.Scripting;
 using Roslyn.Scripting.CSharp;
-
 using ScriptCs.Contracts;
-using System.Text.RegularExpressions;
 
 namespace ScriptCs.Engine.Roslyn
 {
     public class RoslynScriptEngine : IScriptEngine
     {
         private ScriptOptions _scriptOptions;
-        //protected readonly ScriptEngine ScriptEngine;
         private readonly IScriptHostFactory _scriptHostFactory;
 
         public const string SessionKey = "Session";
@@ -132,9 +132,14 @@ namespace ScriptCs.Engine.Roslyn
                 }
 
                 var makemethod = typeof (CSharpScript).GetMethod("Make",
-                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                makemethod.Invoke(sessionState.Session.Script,
-                    new object[] {code, null, _scriptOptions, host.GetType(), typeof (object), null, sessionState.Session.Script});
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+
+                if (sessionState.Session != null)
+                {
+                    makemethod.Invoke(sessionState.Session.Script,
+                        new object[]
+                        {code, null, _scriptOptions, host.GetType(), typeof (object), null, sessionState.Session.Script});
+                }
                 //result = CSharpScript.Run(code, _scriptOptions, sessionState.Session);
                 //sessionState.Session = result;
                 scriptResult = Execute(code, sessionState.Session, sessionState);
@@ -169,7 +174,7 @@ namespace ScriptCs.Engine.Roslyn
             //return result;
         }
 
-        private ScriptResult Execute(string code, object globals, SessionState<ScriptState> sessionState)
+        protected virtual ScriptResult Execute(string code, object globals, SessionState<ScriptState> sessionState)
         {
             try
             {
@@ -226,18 +231,12 @@ namespace ScriptCs.Engine.Roslyn
         //    }
         //}
 
-        //protected static bool IsCompleteSubmission(string code)
-        //{
-        //    var options = new ParseOptions(
-        //        CompatibilityMode.None,
-        //        LanguageVersion.CSharp4,
-        //        true,
-        //        SourceCodeKind.Interactive,
-        //        default(ReadOnlyArray<string>));
+        protected static bool IsCompleteSubmission(string code)
+        {
+            var options = new CSharpParseOptions(LanguageVersion.CSharp6, DocumentationMode.Parse,
+                SourceCodeKind.Interactive, null);
 
-        //    var syntaxTree = SyntaxTree.ParseText(code, options: options);
-
-        //    return Syntax.IsCompleteSubmission(syntaxTree);
-        //}
+            return SyntaxFactory.IsCompleteSubmission(SyntaxFactory.ParseSyntaxTree(code, options: options));
+        }
     }
 }
