@@ -5,8 +5,8 @@ using System.Reflection;
 using Common.Logging;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Roslyn.Scripting;
-using Roslyn.Scripting.CSharp;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Scripting.CSharp;
 using ScriptCs.Contracts;
 
 namespace ScriptCs.Engine.Roslyn

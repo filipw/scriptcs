@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Common.Logging;
-using Roslyn.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using ScriptCs.Contracts;
 
 namespace ScriptCs.Engine.Roslyn
 {
-    using System.Globalization;
-
     public class RoslynReplEngine : RoslynScriptEngine, IReplEngine
     {
         public RoslynReplEngine(IScriptHostFactory scriptHostFactory, ILog logger)
